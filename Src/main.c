@@ -57,6 +57,7 @@ uint32_t n_calibrations = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void PeriphCommonClock_Config(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -88,6 +89,9 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
+/* Configure the peripherals common clocks */
+  PeriphCommonClock_Config();
+
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -97,6 +101,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_ADC1_Init();
   MX_TIM2_Init();
+  MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start( &htim2, TIM_CHANNEL_2 );	// Start PWM: TIM2 (CH2)
   HAL_TIM_OC_Start( &htim2, TIM_CHANNEL_1 );	// Start Output Compare (CH1)
@@ -104,6 +109,8 @@ int main(void)
 //  HAL_ADC_Start(&hadc1);
   HAL_ADCEx_Calibration_Start( &hadc1, ADC_SINGLE_ENDED );
   HAL_ADCEx_InjectedStart_IT( &hadc1 ); 		// Start ADC Conversion (Injected Channel, Tim2-PWM-Triggered, Interrupt Mode)
+  HAL_ADCEx_Calibration_Start( &hadc2, ADC_SINGLE_ENDED );
+    HAL_ADCEx_InjectedStart_IT( &hadc2 ); 		// Start ADC Conversion (Injected Channel, Tim2-PWM-Triggered, Interrupt Mode)
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -166,6 +173,31 @@ void SystemClock_Config(void)
   }
 }
 
+/**
+  * @brief Peripherals Common Clock Configuration
+  * @retval None
+  */
+void PeriphCommonClock_Config(void)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+
+  /** Initializes the peripherals clock
+  */
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCCLKSOURCE_PLLSAI1;
+  PeriphClkInit.PLLSAI1.PLLSAI1Source = RCC_PLLSOURCE_HSI;
+  PeriphClkInit.PLLSAI1.PLLSAI1M = 1;
+  PeriphClkInit.PLLSAI1.PLLSAI1N = 8;
+  PeriphClkInit.PLLSAI1.PLLSAI1P = RCC_PLLP_DIV7;
+  PeriphClkInit.PLLSAI1.PLLSAI1Q = RCC_PLLQ_DIV2;
+  PeriphClkInit.PLLSAI1.PLLSAI1R = RCC_PLLR_DIV2;
+  PeriphClkInit.PLLSAI1.PLLSAI1ClockOut = RCC_PLLSAI1_ADC1CLK;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
 /* USER CODE BEGIN 4 */
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc){
 //	if( n_calibrations < NB_CONVERSIONS ){
@@ -179,11 +211,12 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc){
 //			calibration_base_b /= NB_CONVERSIONS;
 //		}
 //	}else
-	{
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET); // Toggle This Pin To Check The ADC Trigger Time On DSO
+	if( hadc == &hadc1 ){
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET); // Toggle This Pin To Check The ADC Trigger Time On DSO
 		InjADC_Reading = (int32_t)HAL_ADCEx_InjectedGetValue( &hadc1, ADC_INJECTED_RANK_1 ) - (int32_t)calibration_base_a; // Read The Injected Channel Result
-		InjADC_Reading2 = (int32_t)HAL_ADCEx_InjectedGetValue( &hadc1, ADC_INJECTED_RANK_2 ) - (int32_t)calibration_base_b; // Read The Injected Channel Result
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+	}else{
+		InjADC_Reading2 = (int32_t)HAL_ADCEx_InjectedGetValue( &hadc2, ADC_INJECTED_RANK_1 ) - (int32_t)calibration_base_b; // Read The Injected Channel Result
 	}
 
 }
