@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
 #include "ms_timer.h"
+#include "enc_sincos.h"
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
 
@@ -58,7 +59,7 @@
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 /* USER CODE BEGIN EV */
-
+extern EncSinCosConfigT enc_cfg;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -210,7 +211,8 @@ void ADC1_2_IRQHandler(void)
   HAL_ADC_IRQHandler(&hadc1);
   HAL_ADC_IRQHandler(&hadc2);
   /* USER CODE BEGIN ADC1_2_IRQn 1 */
-
+  enc_sincos_adc12_callback( &enc_cfg );
+//  enc_sincos_read_deg( &enc_cfg, adc_value_sin, adc_value_cos)
   /* USER CODE END ADC1_2_IRQn 1 */
 }
 

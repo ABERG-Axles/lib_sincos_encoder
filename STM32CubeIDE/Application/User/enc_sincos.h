@@ -17,8 +17,8 @@ typedef struct{
 	float signal_low_error_rate;
 	float signal_above_max_error_rate;
 	float last_enc_angle;
-	float sin_filter;
-	float cos_filter;
+	float sin_filtered;
+	float cos_filtered;
 	uint64_t last_update_time;
 }EncSinCosStateT;
 
@@ -39,6 +39,7 @@ typedef struct{
 bool enc_sincos_init( EncSinCosConfigT* pcfg );
 void enc_sincos_shutdown( EncSinCosConfigT* pcfg );
 float enc_sincos_read_deg( EncSinCosConfigT* pcfg, uint32_t adc_value_sin, uint32_t adc_value_cos );
-void enc_sincos_calibrate( EncSinCosConfigT* pcfg, uint32_t adc_value_sin, uint32_t adc_value_cos );
+void enc_sincos_calibrate( /*EncSinCosConfigT* pcfg,*/ uint32_t adc_value_sin, uint32_t adc_value_cos );
+void enc_sincos_adc12_callback( EncSinCosConfigT* pcfg );
 
 #endif /* APPLICATION_USER_ENC_SINCOS_H_ */

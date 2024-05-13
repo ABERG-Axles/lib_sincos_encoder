@@ -20,7 +20,7 @@
  * @param filter_constant
  * Filter constant. Range 0.0 to 1.0, where 1.0 gives the unfiltered value.
  */
-#define UTILS_LP_FAST(value, sample, filter_constant)	(value -= (filter_constant) * ((value) - (sample)))
+#define LP_FAST(value, sample, filter_constant)	(value -= (filter_constant) * ((value) - (sample)))
 
 #define SQ(x)				((x) * (x))
 
@@ -28,7 +28,8 @@
 	#define M_PI		3.14159265358979323846
 #endif
 
-#define RAD2DEG_f( rad ) ( ( rad ) * ( float )( 180.0 / M_PI ) )
+#define RAD2DEG( rad ) ( ( rad ) * ( float )( 180.0 / M_PI ) )
+#define DEG2RAD( deg ) ( ( deg ) * ( float )( M_PI / 180.0 ) )
 
 #define UTILS_IS_NAN(x)		((x) != (x))
 #define UTILS_NAN_ZERO(x)	(x = UTILS_IS_NAN(x) ? 0.0 : x)

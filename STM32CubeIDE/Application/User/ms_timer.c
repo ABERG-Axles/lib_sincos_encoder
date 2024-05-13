@@ -16,7 +16,7 @@ void ms_timer_handler( void ){
 	++ g_millitimer;
 }
 
-float timer_seconds_elapsed_since( uint64_t time_ms ){
+float ms_timer_seconds_elapsed_since( uint64_t time_ms ){
 	uint64_t diff = g_millitimer - time_ms;
 	return diff * 1e-3;
 }

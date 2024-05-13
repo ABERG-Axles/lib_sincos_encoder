@@ -22,6 +22,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "enc_sincos.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -30,7 +31,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+EncSinCosConfigT enc_cfg;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -40,12 +41,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-volatile uint32_t InjADC_Reading = 0;
-volatile uint32_t InjADC_Reading2 = 0;
-uint32_t calibration_base_a = 0;
-uint32_t calibration_base_b = 0;
-#define NB_CONVERSIONS 16u
-uint32_t n_calibrations = 0;
+
 
 /* USER CODE END PM */
 
@@ -103,6 +99,7 @@ int main(void)
   MX_TIM2_Init();
   MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
+  enc_sincos_init( &enc_cfg );
   HAL_TIM_PWM_Start( &htim2, TIM_CHANNEL_2 );	// Start PWM: TIM2 (CH2)
   HAL_TIM_OC_Start( &htim2, TIM_CHANNEL_1 );	// Start Output Compare (CH1)
   TIM2->CCR1 = 1;								// // Set The OC1 Trigger Point To The Middle of The PWM Waveform
@@ -110,7 +107,8 @@ int main(void)
   HAL_ADCEx_Calibration_Start( &hadc1, ADC_SINGLE_ENDED );
   HAL_ADCEx_InjectedStart_IT( &hadc1 ); 		// Start ADC Conversion (Injected Channel, Tim2-PWM-Triggered, Interrupt Mode)
   HAL_ADCEx_Calibration_Start( &hadc2, ADC_SINGLE_ENDED );
-    HAL_ADCEx_InjectedStart_IT( &hadc2 ); 		// Start ADC Conversion (Injected Channel, Tim2-PWM-Triggered, Interrupt Mode)
+  HAL_ADCEx_InjectedStart_IT( &hadc2 ); 		// Start ADC Conversion (Injected Channel, Tim2-PWM-Triggered, Interrupt Mode)
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -199,17 +197,7 @@ void PeriphCommonClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc){
-	if( hadc == &hadc1 ){
-//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET); // Toggle This Pin To Check The ADC Trigger Time On DSO
-		InjADC_Reading = HAL_ADCEx_InjectedGetValue( &hadc1, ADC_INJECTED_RANK_1 ); // Read The Injected Channel Result
-//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
-	}else{
-		InjADC_Reading2 = HAL_ADCEx_InjectedGetValue( &hadc2, ADC_INJECTED_RANK_1 ); // Read The Injected Channel Result
-	}
 
-
-}
 /* USER CODE END 4 */
 
 /**
