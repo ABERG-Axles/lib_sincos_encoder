@@ -42,7 +42,7 @@ sincos filter constant 0.5
 #define ENCODER_COS_AMP			0.556f
 #define ENCODER_SIN_OFFSET		1.473f
 #define ENCODER_COS_OFFSET		1.484f
-#define ENCODER_SINCOS_FILTER	0.3f // was 0.5f
+#define ENCODER_SINCOS_FILTER	0.2f // was 0.5f
 #define ENCODER_SINCOS_PHASE	0.0f
 
 

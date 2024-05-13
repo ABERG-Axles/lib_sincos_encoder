@@ -22,9 +22,11 @@
 #include "stm32l4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-/* USER CODE END Includes */
 #include "ms_timer.h"
 #include "enc_sincos.h"
+#include <stm32l4xx_ll_adc.h>
+/* USER CODE END Includes */
+
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
 
@@ -206,13 +208,15 @@ void SysTick_Handler(void)
 void ADC1_2_IRQHandler(void)
 {
   /* USER CODE BEGIN ADC1_2_IRQn 0 */
-
+#if 0
   /* USER CODE END ADC1_2_IRQn 0 */
   HAL_ADC_IRQHandler(&hadc1);
   HAL_ADC_IRQHandler(&hadc2);
   /* USER CODE BEGIN ADC1_2_IRQn 1 */
-  enc_sincos_adc12_callback( &enc_cfg );
-//  enc_sincos_read_deg( &enc_cfg, adc_value_sin, adc_value_cos)
+#else
+  LL_ADC_ClearFlag_JEOS( ADC1 );
+  enc_sincos_read_values( &enc_cfg );
+#endif
   /* USER CODE END ADC1_2_IRQn 1 */
 }
 

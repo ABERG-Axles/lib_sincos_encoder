@@ -11,7 +11,7 @@
 #include "enc_sincos_cfg.h"
 #include "utils.h"
 #include "ms_timer.h"
-#include "adc.h"
+
 
 
 // ---------------------------------------------- members ----------------------------------------------
@@ -52,8 +52,25 @@ static void calculate_amp_off(){
 	c_gain = 1.0f / c_amp;
 }
 
+static inline uint32_t read_inj_channel( ADC_TypeDef* adcx, uint32_t channel ){
+	switch ( channel ){
+	    case ADC_INJECTED_RANK_4:
+	      return adcx->JDR4;
+	    case ADC_INJECTED_RANK_3:
+	      return adcx->JDR3;
+	      break;
+	    case ADC_INJECTED_RANK_2:
+	      return adcx->JDR2;
+	      break;
+	    case ADC_INJECTED_RANK_1:
+	    default:
+	      return adcx->JDR1;
+	      break;
+	  }
+}
+
 // ---------------------------------------------- interface ----------------------------------------------
-bool enc_sincos_init( EncSinCosConfigT* pcfg ){
+bool enc_sincos_get_defaults( EncSinCosConfigT* pcfg ){
 	memset( &pcfg->state, 0, sizeof( EncSinCosStateT ) );
 	out_sin = 0.0f;
 	out_cos = 0.0f;
@@ -67,13 +84,17 @@ bool enc_sincos_init( EncSinCosConfigT* pcfg ){
 	c_max = 0.0f;
 	c_min = UPPER_BOUND_V;
 
-	pcfg->s_gain 			= 1.0f / ENCODER_SIN_AMP;
-	pcfg->s_offset			= ENCODER_SIN_OFFSET;
-	pcfg->c_gain			= 1.0f / ENCODER_COS_AMP;
-	pcfg->c_offset			= ENCODER_COS_OFFSET;
-	pcfg->filter_constant	= ENCODER_SINCOS_FILTER;
-	pcfg->sph 				= sinf( DEG2RAD( ENCODER_SINCOS_PHASE ) );
-	pcfg->cph 				= cosf( DEG2RAD( ENCODER_SINCOS_PHASE ) );
+	pcfg->s_gain 				= 1.0f / ENCODER_SIN_AMP;
+	pcfg->s_offset				= ENCODER_SIN_OFFSET;
+	pcfg->c_gain				= 1.0f / ENCODER_COS_AMP;
+	pcfg->c_offset				= ENCODER_COS_OFFSET;
+	pcfg->filter_constant		= ENCODER_SINCOS_FILTER;
+	pcfg->sph 					= sinf( DEG2RAD( ENCODER_SINCOS_PHASE ) );
+	pcfg->cph 					= cosf( DEG2RAD( ENCODER_SINCOS_PHASE ) );
+	pcfg->adcx1					= ADC1;
+	pcfg->injected_channel_1	= ADC_INJECTED_RANK_1;
+	pcfg->adcx2					= ADC2;
+	pcfg->injected_channel_2 	= ADC_INJECTED_RANK_1;
 	return true;
 }
 
@@ -150,16 +171,26 @@ void enc_sincos_calibrate( /*EncSinCosConfigT* pcfg,*/ uint32_t adc_value_sin, u
 	}
 }
 
-//------------------------------------------------------------------------
-void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc){
-	if( hadc == &hadc1 ){
-		InjADC_Reading = HAL_ADCEx_InjectedGetValue( &hadc1, ADC_INJECTED_RANK_1 ); // Read The Injected Channel Result
-	}else{
-		InjADC_Reading2 = HAL_ADCEx_InjectedGetValue( &hadc2, ADC_INJECTED_RANK_1 ); // Read The Injected Channel Result
-	}
-}
 
-void enc_sincos_adc12_callback( EncSinCosConfigT* pcfg ){
+void enc_sincos_read_values( EncSinCosConfigT* pcfg ){
 //	enc_sincos_calibrate( InjADC_Reading, InjADC_Reading2 );
+//	InjADC_Reading = ( uint32_t )ADC1->JDR1;
+	InjADC_Reading = read_inj_channel( pcfg->adcx1, pcfg->injected_channel_1 );
+//	InjADC_Reading2 = ( uint32_t )ADC2->JDR1;
+	InjADC_Reading2 = read_inj_channel( pcfg->adcx2, pcfg->injected_channel_2 );
 	last_deg = enc_sincos_read_deg( pcfg, InjADC_Reading, InjADC_Reading2 );
 }
+
+
+/*
+  void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc){
+        if( hadc == &hadc1 ){
+               InjADC_Reading = HAL_ADCEx_InjectedGetValue( &hadc1, ADC_INJECTED_RANK_1 ); // Read The Injected Channel Result
+        }else{
+               InjADC_Reading2 = HAL_ADCEx_InjectedGetValue( &hadc2, ADC_INJECTED_RANK_1 ); // Read The Injected Channel Result
+        }
+
+
+ }
+
+ */

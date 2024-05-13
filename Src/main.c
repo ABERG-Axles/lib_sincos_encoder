@@ -99,7 +99,7 @@ int main(void)
   MX_TIM2_Init();
   MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
-  enc_sincos_init( &enc_cfg );
+  enc_sincos_get_defaults( &enc_cfg );
   HAL_TIM_PWM_Start( &htim2, TIM_CHANNEL_2 );	// Start PWM: TIM2 (CH2)
   HAL_TIM_OC_Start( &htim2, TIM_CHANNEL_1 );	// Start Output Compare (CH1)
   TIM2->CCR1 = 1;								// // Set The OC1 Trigger Point To The Middle of The PWM Waveform
