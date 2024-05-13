@@ -40,8 +40,8 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-volatile int32_t InjADC_Reading = 0;
-volatile int32_t InjADC_Reading2 = 0;
+volatile uint32_t InjADC_Reading = 0;
+volatile uint32_t InjADC_Reading2 = 0;
 uint32_t calibration_base_a = 0;
 uint32_t calibration_base_b = 0;
 #define NB_CONVERSIONS 16u
@@ -200,24 +200,14 @@ void PeriphCommonClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc){
-//	if( n_calibrations < NB_CONVERSIONS ){
-//		calibration_base_a += HAL_ADCEx_InjectedGetValue( &hadc1, ADC_INJECTED_RANK_1 );
-//		calibration_base_b += HAL_ADCEx_InjectedGetValue( &hadc1, ADC_INJECTED_RANK_2 );
-//
-//		n_calibrations ++;
-//
-//		if( n_calibrations == NB_CONVERSIONS ){
-//			calibration_base_a /= NB_CONVERSIONS;
-//			calibration_base_b /= NB_CONVERSIONS;
-//		}
-//	}else
 	if( hadc == &hadc1 ){
 //		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET); // Toggle This Pin To Check The ADC Trigger Time On DSO
-		InjADC_Reading = (int32_t)HAL_ADCEx_InjectedGetValue( &hadc1, ADC_INJECTED_RANK_1 ) - (int32_t)calibration_base_a; // Read The Injected Channel Result
+		InjADC_Reading = HAL_ADCEx_InjectedGetValue( &hadc1, ADC_INJECTED_RANK_1 ); // Read The Injected Channel Result
 //		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
 	}else{
-		InjADC_Reading2 = (int32_t)HAL_ADCEx_InjectedGetValue( &hadc2, ADC_INJECTED_RANK_1 ) - (int32_t)calibration_base_b; // Read The Injected Channel Result
+		InjADC_Reading2 = HAL_ADCEx_InjectedGetValue( &hadc2, ADC_INJECTED_RANK_1 ); // Read The Injected Channel Result
 	}
+
 
 }
 /* USER CODE END 4 */
